@@ -1,0 +1,103 @@
+.cl-card {
+    background-color: var(--color-cards);
+    box-shadow: 1px 1px 0px 0px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 1.5em;
+    padding-bottom: 1.5em;
+}
+
+.cl-headerTitle {
+    font-family: var(--font-sora);
+    font-weight: 600;
+    font-size: 1.35rem;
+    color: var(--navy);
+}
+
+.cl-headerSubtitle {
+    font-family: var(--font-sora);
+    font-weight: 400;
+    font-size: 0.75rem;
+    color: var(--sec-navy);
+}
+
+.cl-formFieldLabel {
+    font-family: var(--font-sora);
+    font-weight: 400;
+    font-size: 0.75rem;
+    color: var(--sec-navy);
+}
+
+.cl-formFieldInput {
+    font-family: var(--font-sora);
+    font-weight: 400;
+    font-size: 0.75rem;
+    color: var(--sec-navy);
+}
+
+.cl-formFieldInput:focus {
+    border-color: var(--color-accent-blue) !important;
+}
+
+.cl-formButtonPrimary {
+  height: 42px;
+  background-color: var(--color-navy) !important;
+  border-radius: 8px;
+  font-weight: 500;
+  font-family: var(--font-sora);
+}
+
+.cl-formButtonPrimary:hover {
+  opacity: 0.8 !important;
+}
+
+/* Social login buttons */
+.cl-socialButtonsBlockButton {
+  height: 42px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-family: var(--font-sora);
+}
+
+/* Divider */
+.cl-dividerLine {
+  background-color: #e5e7eb;
+}
+
+.cl-dividerText {
+  color: #9ca3af;
+  font-family: var(--font-sora);
+}
+
+/* Links */
+.cl-footerActionLink {
+  color: var(--color-sec-accent);
+  font-family: var(--font-sora);
+  font-weight: 500;
+}
+
+.cl-footerActionLink:hover {
+  color: #1d4ed8;
+}
+
+/* Footer */
+.cl-footerActionText {
+  font-family: var(--font-sora);
+  font-weight: 400;
+  color: var(--sec-text);
+}
+
+/* Error messages */
+.cl-formFieldErrorText {
+  color: #dc2626;
+  font-size: 0.8rem;
+  font-family: var(--font-sora);
+}
+
+/* Hide Clerk branding */
+.cl-internal-b3fm6y {
+  display: none;
+}

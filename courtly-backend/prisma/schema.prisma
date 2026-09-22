@@ -1,0 +1,253 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String            @id @default(uuid())
+  clerkId         String            @unique
+  name            String
+  email           String            @unique
+  orgId           String?
+
+  organization    Organization?              @relation(fields: [orgId], references: [id])
+
+  createdCases    Case[]
+
+  caseAssignments CaseLawyer[]
+
+  documentsUploaded Document[]
+
+  createdEvents   CaseEvent[]
+
+  assignedTasks   Task[]
+
+  authoredNotes   Note[]
+
+  hearingsCreated Hearing[]
+
+  userNotifs      Notification[]
+}
+
+model Organization {
+  id              String            @id @default(uuid())
+  clerkOrgId      String            @unique
+  name            String
+
+  users           User[]
+  cases           Case[]
+}
+
+enum CaseType {
+  CIVIL
+  CRIMINAL
+  CORPORATE
+  COMMERCIAL
+  FAMILY
+  LABOR
+  PROPERTY
+  TAX
+  OTHER
+}
+
+enum CaseStatus {
+  ACTIVE
+  CLOSED
+  PENDING
+}
+
+model Case {
+  id              String           @id @default(uuid())
+  caseNumber      String
+  title           String
+  type            CaseType
+  status          CaseStatus
+  description     String?
+
+  orgId           String
+
+  createdBy       String
+
+  organization    Organization      @relation(fields: [orgId], references: [id])
+
+  creator         User              @relation(fields: [createdBy], references: [id])
+
+  lawyers         CaseLawyer[]
+
+  caseParties     CaseParty[]
+
+  caseDocuments   Document[]
+
+  caseEvents      CaseEvent[]
+
+  caseTasks       Task[]
+
+  caseHearings    Hearing[]
+
+  caseNotes       Note[]
+
+  caseNotifs      Notification[]
+
+  @@unique([orgId, caseNumber])
+}
+
+model CaseLawyer {
+  caseId          String
+  lawyerId        String
+
+  case            Case              @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  lawyer          User              @relation(fields: [lawyerId], references: [id])
+
+  @@id([caseId, lawyerId])
+}
+
+model CaseParty {
+  id              String            @id @default(uuid())
+  caseId          String
+  name            String
+  type            PartyType
+
+  case            Case              @relation(fields: [caseId], references: [id], onDelete: Cascade)
+}
+
+enum PartyType {
+  PLAINTIFF
+  DEFENDANT
+  CLAIMANT
+  RESPONDENT
+  APPELLANT
+  APPELLEE
+  PETITIONER
+  WITNESS
+  VICTIM
+  ACCUSED
+  COMPLAINANT
+  INTERVENOR
+  THIRD_PARTY
+  OTHER
+}
+
+model Document {
+  id              String            @id @default(uuid())
+  caseId          String
+  uploadedBy      String
+  name            String
+  path            String
+  type            String
+  size            String
+  dateCreated     DateTime          @default(now())
+
+  case            Case              @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  uploader        User              @relation(fields: [uploadedBy], references: [id])
+}
+
+model CaseEvent {
+  id              String            @id @default(uuid())
+  caseId          String
+  type            EventType
+  action     String
+  createdBy       String
+  date            DateTime          @default(now())
+
+  case            Case              @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  eventCreator    User              @relation(fields: [createdBy], references: [id])
+}
+
+// Event types will be needed for changing organization membership
+// Event needed for adding a note to a case
+enum EventType {
+  CASE_CREATED
+  LAWYER_ASSIGNED
+  TASK_ASSIGNED
+  TASK_DELETED
+  STATUS_CHANGED
+  HEARING_SCHEDULED
+  HEARING_DELETED
+  DOCUMENT_UPLOADED
+  DOCUMENT_DELETED
+  NOTE_ADDED
+  NOTE_DELETED
+}
+
+model Task {
+  id         String     @id @default(uuid())
+  caseId     String
+  assignedTo String
+  title      String
+  status     TaskStatus
+  dueDate    DateTime?
+
+  case     Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  assignee User @relation(fields: [assignedTo], references: [id])
+}
+
+enum TaskStatus {
+  TODO
+  COMPLETED
+}
+
+model Hearing {
+  id          String   @id @default(uuid())
+  caseId      String
+  date        DateTime
+  court       String
+  createdBy   String
+  description String?
+
+  case Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  hearingCreator  User @relation(fields: [createdBy], references: [id])
+}
+
+// add relation to hearing creator and hearing deleted events
+
+model Note {
+  id         String   @id @default(uuid())
+  caseId     String
+  authorId   String
+  content    String
+  visibility NoteVisibility
+  createdAt  DateTime @default(now())
+
+  case   Case @relation(fields: [caseId], references: [id], onDelete: Cascade)
+  author User @relation(fields: [authorId], references: [id])
+}
+
+enum NoteVisibility {
+  PRIVATE
+  ORGANIZATION
+}
+
+model Notification {
+  id        String     @id @default(uuid())
+  userId    String
+  caseId    String
+  type      NotificationType
+  title     String
+  message   String
+  read      Boolean    @default(false)
+  createdAt DateTime   @default(now())
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  case      Case       @relation(fields: [caseId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+enum NotificationType {
+  LAWYER_ASSIGNED
+  TASK_ASSIGNED
+  STATUS_CHANGED
+  HEARING_SCHEDULED
+  DOCUMENT_UPLOADED
+  NOTE_ADDED
+}
