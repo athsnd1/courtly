@@ -9,6 +9,8 @@ router.get("/", NotifController.getNotificationsController);
 
 router.get("/stream", NotifController.notifStreamController);
 
+router.patch("/all", NotifController.markAllAsReadController);
+
 router.patch("/:notifId", validateNotifStatus(notifStatusSchema), NotifController.changeNotifStatusController);
 
 router.delete("/:notifId", NotifController.deleteNotifController);

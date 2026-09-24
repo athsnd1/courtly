@@ -1,6 +1,6 @@
 import { getAuth } from "@clerk/express";
 import type { Request, Response } from "express";
-import * as NotifService from "../services/notifications.services";
+import * as NotifService from "../services/notifications.service";
 import { addClient, removeClient } from "../utils/notificationSSE";
 
 export async function getNotificationsController (req: Request, res: Response) {
@@ -55,3 +55,12 @@ export async function notifStreamController (req: Request, res: Response) {
         removeClient(userId as string, res);
     });
 };
+
+export async function markAllAsReadController (req: Request, res: Response) {
+
+    const { userId } = getAuth(req);
+
+    await NotifService.markAllAsRead(userId as string);
+
+    return res.status(200).json({ message: "Notifications marked as read" });
+}

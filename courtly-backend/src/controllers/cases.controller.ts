@@ -1,6 +1,6 @@
 import { getAuth } from "@clerk/express";
 import type { Request, Response } from "express";
-import * as CaseService from "../services/cases.services";
+import * as CaseService from "../services/cases.service";
 
 export async function createCaseController (req: Request, res: Response) {
 

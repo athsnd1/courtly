@@ -4,7 +4,7 @@ import supabase from "../config/supabase.config";
 import { CaseSchemaType } from "../validators/case.validator";
 import { TaskSchemaType } from "../validators/task.validator";
 import { HearingData } from "../validators/hearing.validator";
-import * as NotifService from "./notifications.services";
+import * as NotifService from "./notifications.service";
 
 
 export async function createCase (clerkUserId: string, clerkOrgId: string, caseData: CaseSchemaType) {

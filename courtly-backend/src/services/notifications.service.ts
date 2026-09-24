@@ -3,6 +3,7 @@ import prisma from "../config/prisma.config";
 import { getUser } from "../utils/getUser";
 import { getCaseFromId } from "../utils/getCaseFromId";
 import { sendNotifications } from "../utils/notificationSSE";
+import { emailQueue } from '../queues/email.queue';
 
 
 
@@ -22,7 +23,23 @@ export async function createNotification (clerkUserId: string, caseId: string, n
         }
     });
 
-    sendNotifications(clerkUserId);
+    sendNotifications(clerkUserId); //send sse notification
+
+    await emailQueue.add(
+        "send-email", 
+        {
+            to: user.email,
+            subject: "Task Assigned",
+            message,
+        },
+        {
+            attempts: 3,
+            backoff: {
+                type: "exponential",
+                delay: 5000
+            }
+        }
+    );
 
 };
 
@@ -52,6 +69,23 @@ export async function createNotifs (clerkUserId: string, caseId: string, notifTy
 
             if (lawyer) {
                 sendNotifications(lawyer.lawyer.clerkId);
+                await emailQueue.add(
+                    "send-email", 
+                    {
+                        to: lawyer.lawyer.email,
+                        subject: notifType.split("_").map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(" "), 
+                        message
+                    },
+                    {
+                        attempts: 3,
+                        backoff: {
+                            type: "exponential",
+                            delay: 5000
+                        },
+                        removeOnComplete: true,
+                        removeOnFail: false
+                    }
+                );
             }
         }
     }
@@ -112,4 +146,18 @@ export async function deleteNotif (clerkUserId: string, notifId: string) {
         }
     });
 
-}
+};
+
+export async function markAllAsRead (clerkUserId: string) {
+
+    const user = await getUser(clerkUserId);
+
+    return await prisma.notification.updateMany({
+        where: {
+            userId: user.id
+        },
+        data: {
+            read: true
+        }
+    });
+};

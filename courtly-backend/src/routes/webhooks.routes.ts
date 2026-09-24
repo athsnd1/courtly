@@ -1,6 +1,7 @@
 import { verifyWebhook } from "@clerk/express/webhooks";
 import express from "express";
-import * as WebhookService from "../services/webhooks.services";
+import * as WebhookService from "../services/webhooks.service";
+import logger from "../config/logger.config";
 
 const router = express.Router();
 
@@ -42,13 +43,13 @@ router.post("/clerk", express.raw({ type: "application/json" }), async (req, res
                 break;
             
             default:
-                req.log.info(`Unhandled webhook event type: ${event.type}`);
+                logger.info(`Unhandled webhook event type: ${event.type}`);
         }
 
         res.status(200).json({ status: "Success" });
 
     } catch (error) {
-        req.log.error(error);
+        logger.error(error);
         res.status(500).json({ error: "Internal server error" });
     }
 
