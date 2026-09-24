@@ -1,12 +1,10 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 
 export function useNotificationStream () {
 
     const queryClient = useQueryClient();
-
-    const [showDot, setShowDot] = useState(false);
    
     useEffect(() => {
 
@@ -20,7 +18,6 @@ export function useNotificationStream () {
             queryClient.invalidateQueries({
                 queryKey: ["notifs"]
             });
-            setShowDot(true);
         });
 
         eventSource.onerror = (error) => {
@@ -33,5 +30,4 @@ export function useNotificationStream () {
 
     }, [queryClient]);
 
-    return { showDot, clearDot: () => { setShowDot(false) }};
 }

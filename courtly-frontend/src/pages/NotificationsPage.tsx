@@ -23,6 +23,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import markNotifRead from "@/api/markNotifRead";
 import toast from "react-hot-toast";
 import deleteNotif from "@/api/deleteNotif";
+import markAllNotifsAsRead from "@/api/markAllNotifsAsRead";
 
 const notificationConfig = {
   [NotificationType.CASE_CREATED]: {
@@ -118,6 +119,26 @@ export default function NotificationsPage() {
     }
   });
 
+  const markAllAsReadMutation = useMutation({
+    mutationFn: markAllNotifsAsRead,
+
+    onMutate: () => {
+      const toastId = toast.loading("Mark all as read...");
+      return { toastId };
+    },
+
+    onSuccess: (_data, _variables, context) => {
+      toast.success("Notifications marked as read", { id: context?.toastId });
+      queryClient.invalidateQueries({
+        queryKey: ["notifs"]
+      });
+    },
+
+    onError: (_error, _variables, context) => {
+      toast.error("Failed to mark notifications as read", { id: context?.toastId });
+    }
+  })
+
   if (isLoading) {
     return <LoadingPage />
   }
@@ -140,10 +161,16 @@ export default function NotificationsPage() {
           ${allSelected ? "bg-navy text-white" : "bg-cards border-1 border-border text-navy"} ml-1 cursor-pointer hover:bg-navy hover:text-white hover:opacity-95`}
           onClick={() => {setAllSelected(!allSelected); setUnreadSelected(!unreadSelected);}}> All</Button>
 
-        <Button className={`ml-1 rounded-full text-[0.9rem] py-1.5 px-3 
+        <Button className={`ml-1 rounded-full text-[0.9rem] py-3 px-3 
           ${unreadSelected ? "bg-navy" : "bg-cards border-1 border-border text-navy"} cursor-pointer
            hover:bg-navy hover:text-white hover:opacity-95`}
           onClick={() => {setUnreadSelected(!unreadSelected); setAllSelected(!allSelected); }}>Unread ({unreadCount || 0})
+        </Button>
+
+        <span className="ml-2 mr-1 text-gray-500">|</span>
+
+        <Button className={`ml-1 rounded-full text-[0.9rem] py-3 px-3 cursor-pointer bg-navy hover:bg-navy hover:text-white hover:opacity-95`}
+          onClick={() => {markAllAsReadMutation.mutate()}}>Mark all as read
         </Button>
 
         {
@@ -165,7 +192,7 @@ export default function NotificationsPage() {
       {unreadSelected && 
       <div className="mt-6 flex flex-col gap-2 h-full max-h-[500px] overflow-y-auto">
 
-        {notifications.length > 0 ? notifications.filter((notif: Notification) => notif.read === false).map((notif: Notification) => {
+        {notifications.length > 0 && notifications.unreadCount > 0 ? notifications.filter((notif: Notification) => notif.read === false).map((notif: Notification) => {
           const config = notificationConfig[notif.type];
           const Icon = config.icon;
 

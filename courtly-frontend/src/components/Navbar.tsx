@@ -8,6 +8,7 @@ import ResultsModal from "./ResultsModal";
 import useDebounce from "@/hooks/useDebounce";
 import { useNavigate } from "react-router-dom";
 import { useNotificationStream } from "@/hooks/useNotificationSteam";
+import { useNotifications } from "@/hooks/useNotifications";
 
 export default function Navbar() {
 
@@ -19,7 +20,7 @@ export default function Navbar() {
 
     const navigate = useNavigate();
 
-    const { showDot, clearDot } = useNotificationStream();
+    useNotificationStream();
 
     useEffect(() => {
         
@@ -43,6 +44,8 @@ export default function Navbar() {
         queryFn: () => findCases(debouncedSearch),
         enabled: debouncedSearch.trim().length >= 2
     });
+
+    const { data: notifData } = useNotifications();
 
   return (
     <div className="h-[60px] bg-cards border-b-1 border-border fixed top-0 left-0 sm:left-[180px] right-0 flex items-center justify-start p-3 z-[9999]">
@@ -69,16 +72,16 @@ export default function Navbar() {
         <div className="ml-auto flex items-center gap-0.5">
 
             <div 
-                className={`hover:bg-bgcol p-1 rounded-md ml-4 transition-all relative h-max w-max ${showDot ? " after:absolute after:w-[8px] after:h-[8px] after:rounded-full after:bg-red-500 after:top-0.5 after:right-1" : ""}`} 
+                className={`hover:bg-bgcol p-1 rounded-md ml-4 transition-all relative h-max w-max ${notifData?.unreadCount > 0 ? " after:absolute after:w-[8px] after:h-[8px] after:rounded-full after:bg-red-500 after:top-0.5 after:right-1" : ""}`} 
                 onClick={() => {
-                    clearDot();
+                    // clearDot();
                     navigate("/dashboard/notifications");
                 }}>
                 <FiBell className={`text-xl text-sec-text cursor-pointer`}/>
             </div>
 
             <div className="flex items-center gap-1 cursor-pointer  hover:bg-bgcol p-2 rounded-md transition-all">
-                <div className="size-8 border-1 border-sec-navy rounded-full shrink-0 flex items-center justify-center">
+                <div className="size-8 border-1 border-sec-navy rounded-full shrink-0 flex items-center justify-center relative after:absolute after:content-[''] after:w-[8px] after:h-[8px] after:bg-green-500 after:rounded-full after:bottom-0 after:right-0">
                     <UserButton 
                         appearance={{
                             options: {
