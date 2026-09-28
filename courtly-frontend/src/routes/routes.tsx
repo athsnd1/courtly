@@ -2,7 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { Suspense } from "react";
 import LoadingPage from "@/pages/LoadingPage";
 import WelcomePage from "@/pages/WelcomePage";
-import { DashboardPage, ActivityPage, CalendarPage, CasesPage, NotificationsPage, TasksPage, DocumentsPage, EditCasePage, CaseInfoPage, EditOrgPage, OrgInfoPage, SettingsPage, AddCasePage } from "./lazy.routes";
+import { DashboardPage, ActivityPage, CalendarPage, CasesPage, NotificationsPage, TasksPage, DocumentsPage, EditCasePage, CaseInfoPage, EditOrgPage, OrgInfoPage, SettingsPage, AddCasePage, SubscriptionsPage } from "./lazy.routes";
 import ErrorPage from "@/pages/ErrorPage";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import SignUpPage from "@/pages/SignUpPage";
@@ -209,6 +209,15 @@ const router = createBrowserRouter([
                 element: (
                     <Suspense fallback={<LoadingPage />}>
                         <AddCasePage />
+                    </Suspense>
+                )
+            },
+
+            {
+                path: "subscriptions",
+                element: (
+                    <Suspense fallback={<LoadingPage />}>
+                        <SubscriptionsPage />
                     </Suspense>
                 )
             },

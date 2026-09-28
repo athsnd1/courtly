@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { LuActivity, LuBriefcaseBusiness, LuCalendarDays, LuFileText, LuLayoutDashboard, LuSquareCheckBig } from "react-icons/lu";
 import { GiScales, GiGreekTemple } from "react-icons/gi";
+import { HiOutlineBadgeCheck } from "react-icons/hi";
 
 export default function Sidebar() {
 
@@ -50,6 +51,11 @@ export default function Sidebar() {
                 <NavLink className={({ isActive }) => `text-cards w-full p-2 rounded-md flex items-center gap-1.5 hover:bg-logo-faint ${isActive ? "bg-logo" : ""} transition-all`} to="organization" title="Organization">
                     <GiGreekTemple className="text-lg"/>
                     <span className="text-md">Organization</span>
+                </NavLink>
+
+                <NavLink className={({ isActive }) => `text-cards w-full p-2 rounded-md flex items-center gap-1.5 hover:bg-logo-faint ${isActive ? "bg-logo" : ""} transition-all`} to="subscriptions" title="Calendar">
+                    <HiOutlineBadgeCheck className="text-lg"/>
+                    <span className="text-md">Subscriptions</span>
                 </NavLink>
 
             </div>

@@ -14,3 +14,4 @@ export const OrgInfoPage = lazy(() => import("@/pages/OrgInfoPage"));
 export const EditOrgPage = lazy(() => import("@/pages/EditOrgPage"));
 export const SettingsPage = lazy(() => import("@/pages/SettingsPage"));
 export const AddCasePage = lazy(() => import("@/pages/AddCasePage"));
+export const SubscriptionsPage = lazy(() => import("@/pages/SubscriptionsPage"));
