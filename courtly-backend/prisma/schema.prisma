@@ -46,6 +46,9 @@ model Organization {
 
   users           User[]
   cases           Case[]
+
+  subscription    Subscription?
+  payments        Payment[]
 }
 
 enum CaseType {
@@ -250,4 +253,62 @@ enum NotificationType {
   HEARING_SCHEDULED
   DOCUMENT_UPLOADED
   NOTE_ADDED
+}
+
+model Subscription {
+  id        String      @id @default(uuid())
+  orgId     String      @unique
+  organization    Organization    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  plan      SubscriptionPlan
+  status    SubscriptionStatus
+
+  paystackPlanCode        String?
+  paystackSubscriptionCode String? @unique
+  paystackCustomerCode     String?
+
+  currentPeriodStart  DateTime?
+  currentPeriodEnd    DateTime?
+
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+enum SubscriptionPlan {
+  FREE
+  PRO
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PENDING
+  CANCELLED
+  EXPIRED
+}
+
+model Payment {
+  id        String        @id @default(uuid())
+
+  orgId     String
+  organization    Organization  @relation(fields: [orgId], references: [id])
+
+  plan      SubscriptionPlan
+  amount    Int
+  currency  String    @default("NGN")
+
+  status    PaymentStatus
+
+  provider      String    @default("PAYSTACK")
+  providerRef   String    @unique
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([orgId])
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
 }

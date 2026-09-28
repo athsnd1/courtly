@@ -1,3 +1,4 @@
+import logger from "../config/logger.config";
 import prisma from "../config/prisma.config";
 
 
@@ -89,3 +90,51 @@ export async function deleteOrganizationMembership (data: any) {
         }
     });
 };
+
+export async function handlePaymentSuccess(data: any) {
+  const payment = await prisma.payment.findUnique({
+    where: {
+      providerRef: data.reference,
+    },
+  });
+
+  if (!payment) {
+    throw new Error(`Payment not found: ${data.reference}`);
+  }
+
+  if (payment.status === "SUCCESS") {
+    return;
+  }
+
+  await prisma.$transaction([
+    prisma.payment.update({
+      where: {
+        id: payment.id,
+      },
+      data: {
+        status: "SUCCESS",
+      },
+    }),
+
+    prisma.subscription.upsert({
+      where: {
+        orgId: payment.orgId,
+      },
+      create: {
+        orgId: payment.orgId,
+        plan: "PRO",
+        status: "ACTIVE",
+        paystackPlanCode: process.env.PAYSTACK_PRO_PLAN_CODE,
+        paystackCustomerCode: data.customer?.customer_code,
+        paystackSubscriptionCode: data.subscription_code,
+      },
+      update: {
+        plan: "PRO",
+        status: "ACTIVE",
+        paystackPlanCode: process.env.PAYSTACK_PRO_PLAN_CODE,
+        paystackCustomerCode: data.customer?.customer_code,
+        paystackSubscriptionCode: data.subscription_code,
+      },
+    }),
+  ]);
+}

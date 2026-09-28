@@ -2,6 +2,7 @@ import { verifyWebhook } from "@clerk/express/webhooks";
 import express from "express";
 import * as WebhookService from "../services/webhooks.service";
 import logger from "../config/logger.config";
+import crypto from "crypto";
 
 const router = express.Router();
 
@@ -51,6 +52,40 @@ router.post("/clerk", express.raw({ type: "application/json" }), async (req, res
     } catch (error) {
         logger.error(error);
         res.status(500).json({ error: "Internal server error" });
+    }
+
+});
+
+router.post("/paystack", express.raw({ type: "application/json" }), async (req, res) => {
+
+    try {
+
+        const signature = req.headers["x-paystack-signature"];
+
+        const hash = crypto.createHmac("sha512", process.env.PAYSTACK_SECRET_KEY!).update(req.body).digest("hex");
+
+        if (hash !== signature) {
+            return res.status(401).json({
+                message: "Invalid signature",
+            });
+        }
+
+        const event = JSON.parse(req.body.toString());
+
+        console.log(event);
+
+        if (event.event === "charge.success") {
+            await WebhookService.handlePaymentSuccess(event.data);
+        }
+
+        return res.sendStatus(200);
+        
+    } catch (error) {
+        logger.error(error);
+
+        return res.status(500).json({
+            message: "Internal server error",
+        });
     }
 
 });

@@ -8,6 +8,7 @@ import { clerkMiddleware, getAuth } from "@clerk/express";
 import lawyerRouter from "./routes/lawyers.routes";
 import caseRouter from "./routes/cases.routes";
 import notifRouter from "./routes/notifications.routes";
+import paymentRouter from "./routes/payment.routes";
 
 //get auth is used for const { userId, orgId } = getAuth(req);
 
@@ -39,6 +40,7 @@ app.get("/api/health", (req, res) => {
 
 app.use("/api/organization", lawyerRouter);
 app.use("/api/cases", caseRouter);
-app.use("/api/notifications", notifRouter)
+app.use("/api/notifications", notifRouter);
+app.use("/api/payments", paymentRouter);
 
 export default app;
