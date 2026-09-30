@@ -3,9 +3,11 @@ import { api } from "@/lib/api";
 
 export default async function handleSubscribe () {
 
-    const response = await api.post(`/payments/subscribe`);
+    try {
+        const response = await api.post(`/payments/subscribe`);
 
-    console.log(response.data);
-
-    // return response.data;
+        window.open(response.data.authorizationUrl, "_blank", "noopener,noreferrer");
+    } catch (error) {
+        console.error(error);
+    }
 }
