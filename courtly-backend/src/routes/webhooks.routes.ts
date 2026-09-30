@@ -74,8 +74,20 @@ router.post("/paystack", express.raw({ type: "application/json" }), async (req, 
 
         console.log(event);
 
+        if (event.event === "subscription.create") {
+            await WebhookService.handleSubCreate(event.data);
+        }
+
         if (event.event === "charge.success") {
             await WebhookService.handlePaymentSuccess(event.data);
+        } 
+        
+        if (event.event === "subscription.disable") {
+            await WebhookService.handleSubDisable(event.data);
+        } 
+
+        if (event.event === "subscription.not_renew") {
+            await WebhookService.handleSubNotRenew(event.data);
         }
 
         return res.sendStatus(200);

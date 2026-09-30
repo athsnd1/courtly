@@ -1,6 +1,7 @@
 import axios from "axios";
 import logger from "../config/logger.config";
 import prisma from "../config/prisma.config";
+import { getOrg } from "../utils/getOrg";
 
 export async function handleSub (subData: { email: string, orgId: string }) {
 
@@ -57,3 +58,55 @@ export async function handleSub (subData: { email: string, orgId: string }) {
         throw error;
     }
 };
+
+
+export async function getCurrentSub (clerkOrgId: string) {
+
+    const org = await getOrg(clerkOrgId);
+
+    const orgSub = await prisma.subscription.findUnique({
+        where: {
+            orgId: org.id
+        }
+    });
+
+    if (!orgSub) {
+        throw new Error("Subscription not found");
+    }
+
+    return { plan: orgSub.plan || "FREE", status: orgSub.status || "PENDING" };
+};
+
+export async function cancelSub (clerkOrgId: string) {
+
+    const org = await getOrg(clerkOrgId);
+
+    const orgSub = await prisma.subscription.findUnique({
+        where: {
+            orgId: org.id
+        }
+    });
+
+    if (!orgSub) {
+        throw new Error("No such subscription found for this organization")
+    }
+
+    const orgSubCode = orgSub.paystackSubscriptionCode;
+
+    const response = await axios.post(
+        "https://api.paystack.co/subscription/disable",
+        {
+            code: orgSubCode,
+            token: orgSub.paystackEmailToken,
+        },
+        {
+            headers: {
+                Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+                "Content-Type": "application/json",
+            },
+        }
+    );
+
+    return response.data;
+
+}
